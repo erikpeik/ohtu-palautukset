@@ -1,5 +1,5 @@
 class PlayerStats:
-    def __init__(self, reader):
+    def __init__(self, reader, console, season):
         self._reader = reader
         self._players = self._reader.get_players()
 
@@ -10,3 +10,9 @@ class PlayerStats:
         nationality_players.sort(
             key=lambda p: p.goals + p.assists, reverse=True)
         return nationality_players
+
+    def get_nationalities(self):
+        nationalities = set()
+        for player in self._players:
+            nationalities.add(player.nationality)
+        return list(nationalities)
