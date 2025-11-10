@@ -1,0 +1,1 @@
+1. Mene alkuperäisen repositorion paikallisen kloonin main-haaraan, tee jokin muutos, commitoi ja pushaa se GitHubiin
