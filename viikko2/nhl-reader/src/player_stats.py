@@ -1,5 +1,5 @@
 class PlayerStats:
-    def __init__(self, reader, console, season):
+    def __init__(self, reader):
         self._reader = reader
         self._players = self._reader.get_players()
 

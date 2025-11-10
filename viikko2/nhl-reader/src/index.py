@@ -1,8 +1,8 @@
-from player_reader import PlayerReader
-from player_stats import PlayerStats
-
 from rich.console import Console
 from rich.table import Table
+
+from player_reader import PlayerReader
+from player_stats import PlayerStats
 
 
 console = Console()
@@ -31,33 +31,46 @@ def render_players_table(players, season, nationality):
     console.print(table)
 
 
-def main():
+def get_season_input():
     season = console.input(
         f"Season [magenta][{', '.join(seasons)}][/magenta] [cyan](2024-25)[cyan]: "
     ).strip()
     if season not in seasons:
         season = "2024-25"
+    return season
+
+
+def get_nationality_input(nationalities):
+    console.print(
+        f"Nationality options: [magenta][{', '.join(nationalities)}][/magenta]")
+    nationality = console.input(
+        "Nationality [cyan](or ENTER to quit)[/cyan]: ").strip()
+    return nationality
+
+
+def process_nationality(nationality, nationalities, stats, season):
+    if nationality not in nationalities:
+        console.print("[red]Invalid nationality[/red]")
+        return
+
+    players = stats.top_scorers_by_nationality(nationality)
+    render_players_table(players, season, nationality)
+
+
+def main():
+    season = get_season_input()
 
     url = f"https://studies.cs.helsinki.fi/nhlstats/{season}/players"
     reader = PlayerReader(url)
-    stats = PlayerStats(reader, console, season)
+    stats = PlayerStats(reader)
 
     nationalities = stats.get_nationalities()
 
     while True:
-        console.print(
-            f"Nationality options: [magenta][{', '.join(nationalities)}][/magenta]")
-        nationality = console.input(
-            "Nationality [cyan](or ENTER to quit)[/cyan]: ").strip()
-
+        nationality = get_nationality_input(nationalities)
         if not nationality:
             break
-        if nationality not in nationalities:
-            console.print("[red]Invalid nationality[/red]")
-            continue
-
-        players = stats.top_scorers_by_nationality(nationality)
-        render_players_table(players, season, nationality)
+        process_nationality(nationality, nationalities, stats, season)
 
 
 if __name__ == "__main__":
