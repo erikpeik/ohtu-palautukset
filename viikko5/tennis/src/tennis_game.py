@@ -8,7 +8,13 @@ class ScoreName(IntEnum):
     FORTY = 3
 
     def __str__(self):
-        return self.name.capitalize()
+        display_names = {
+            ScoreName.LOVE: "Love",
+            ScoreName.FIFTEEN: "Fifteen",
+            ScoreName.THIRTY: "Thirty",
+            ScoreName.FORTY: "Forty",
+        }
+        return display_names[self]
 
 
 class TennisGame:
