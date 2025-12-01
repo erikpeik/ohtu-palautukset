@@ -68,4 +68,7 @@ class TennisGame:
         return f"{self.get_score_label(self.player1_score)}-{self.get_score_label(self.player2_score)}"
 
     def get_score_label(self, points):
-        return str(ScoreName(points))
+        try:
+            return str(ScoreName(points))
+        except ValueError:
+            return "Invalid"
