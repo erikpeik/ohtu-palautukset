@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pelaa - Kivi-Paperi-Sakset</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 700px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 2em;
+      }
+
+      .game-info {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      .scoreboard {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .score-item {
+        text-align: center;
+      }
+
+      .score-label {
+        font-size: 0.9em;
+        opacity: 0.9;
+        margin-bottom: 5px;
+      }
+
+      .score-value {
+        font-size: 2em;
+        font-weight: bold;
+      }
+
+      .move-section {
+        margin-bottom: 30px;
+      }
+
+      .player-label {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+      }
+
+      .move-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+      }
+
+      .move-button {
+        background: white;
+        border: 3px solid #667eea;
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 3em;
+        min-width: 100px;
+        text-align: center;
+      }
+
+      .move-button:hover {
+        background: #667eea;
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .move-button input[type='radio'] {
+        display: none;
+      }
+
+      .move-button input[type='radio']:checked + label {
+        cursor: pointer;
+      }
+
+      .move-button.selected {
+        background: #667eea;
+        transform: scale(1.05);
+      }
+
+      .move-label {
+        display: block;
+        cursor: pointer;
+      }
+
+      .move-name {
+        display: block;
+        font-size: 0.4em;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .submit-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 10px;
+        font-size: 1.2em;
+        cursor: pointer;
+        display: block;
+        margin: 30px auto 0;
+        transition: transform 0.2s;
+      }
+
+      .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .submit-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .end-game-button {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 10px;
+        font-size: 1em;
+        cursor: pointer;
+        display: block;
+        margin: 20px auto 0;
+        transition: transform 0.2s;
+      }
+
+      .end-game-button:hover {
+        transform: translateY(-2px);
+        background: #c82333;
+      }
+
+      .separator {
+        height: 2px;
+        background: #e0e0e0;
+        margin: 30px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎮 {{ game_mode_name }}</h1>
+      <div class="game-info">Kierros {{ round }}</div>
+
+      <div class="scoreboard">
+        <div class="score-item">
+          <div class="score-label">Pelaaja 1</div>
+          <div class="score-value">{{ ekan_pisteet }}</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">Tasapelit</div>
+          <div class="score-value">{{ tasapelit }}</div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">
+            {% if game_mode == 'a' %}Pelaaja 2{% else %}Tietokone{% endif %}
+          </div>
+          <div class="score-value">{{ tokan_pisteet }}</div>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('make_move') }}" id="gameForm">
+        <div class="move-section">
+          <div class="player-label">Pelaaja 1 - Valitse siirtosi:</div>
+          <div class="move-buttons">
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'ekan_siirto', 'k')"
+            >
+              <label class="move-label">
+                ✊
+                <span class="move-name">Kivi</span>
+              </label>
+            </div>
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'ekan_siirto', 'p')"
+            >
+              <label class="move-label">
+                📄
+                <span class="move-name">Paperi</span>
+              </label>
+            </div>
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'ekan_siirto', 's')"
+            >
+              <label class="move-label">
+                ✂️
+                <span class="move-name">Sakset</span>
+              </label>
+            </div>
+          </div>
+          <input type="hidden" name="ekan_siirto" id="ekan_siirto" required />
+        </div>
+
+        {% if game_mode == 'a' %}
+        <div class="separator"></div>
+        <div class="move-section">
+          <div class="player-label">Pelaaja 2 - Valitse siirtosi:</div>
+          <div class="move-buttons">
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'tokan_siirto', 'k')"
+            >
+              <label class="move-label">
+                ✊
+                <span class="move-name">Kivi</span>
+              </label>
+            </div>
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'tokan_siirto', 'p')"
+            >
+              <label class="move-label">
+                📄
+                <span class="move-name">Paperi</span>
+              </label>
+            </div>
+            <div
+              class="move-button"
+              onclick="selectMove(this, 'tokan_siirto', 's')"
+            >
+              <label class="move-label">
+                ✂️
+                <span class="move-name">Sakset</span>
+              </label>
+            </div>
+          </div>
+          <input type="hidden" name="tokan_siirto" id="tokan_siirto" required />
+        </div>
+        {% endif %}
+
+        <button type="submit" class="submit-button" id="submitBtn" disabled>
+          Pelaa kierros
+        </button>
+      </form>
+
+      <form method="GET" action="{{ url_for('game_over') }}">
+        <button type="submit" class="end-game-button">Lopeta peli</button>
+      </form>
+    </div>
+
+    <script>
+      function selectMove(button, inputName, value) {
+        // Remove selected class from all buttons in the same section
+        const section = button.closest('.move-section');
+        section.querySelectorAll('.move-button').forEach((btn) => {
+          btn.classList.remove('selected');
+        });
+
+        // Add selected class to clicked button
+        button.classList.add('selected');
+
+        // Set the hidden input value
+        document.getElementById(inputName).value = value;
+
+        // Check if we can enable submit button
+        checkSubmitButton();
+      }
+
+      function checkSubmitButton() {
+        const ekanSiirto = document.getElementById('ekan_siirto').value;
+        const gameMode = '{{ game_mode }}';
+
+        if (gameMode === 'a') {
+          const tokanSiirto = document.getElementById('tokan_siirto').value;
+          document.getElementById('submitBtn').disabled =
+            !ekanSiirto || !tokanSiirto;
+        } else {
+          document.getElementById('submitBtn').disabled = !ekanSiirto;
+        }
+      }
+    </script>
+  </body>
+</html>

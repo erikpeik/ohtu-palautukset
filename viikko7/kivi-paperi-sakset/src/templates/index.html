@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kivi-Paperi-Sakset</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+      }
+
+      .emoji {
+        font-size: 3em;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .mode-selection {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .mode-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 20px;
+        border-radius: 10px;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: left;
+      }
+
+      .mode-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .mode-button:active {
+        transform: translateY(0);
+      }
+
+      .mode-title {
+        font-weight: bold;
+        font-size: 1.3em;
+        margin-bottom: 5px;
+      }
+
+      .mode-description {
+        font-size: 0.9em;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎮 Kivi-Paperi-Sakset</h1>
+      <div class="emoji">✊ 📄 ✂️</div>
+
+      <form method="POST" action="{{ url_for('start_game') }}">
+        <div class="mode-selection">
+          <button type="submit" name="game_mode" value="a" class="mode-button">
+            <div class="mode-title">👥 Pelaaja vs Pelaaja</div>
+            <div class="mode-description">
+              Pelaa kaverin kanssa samalla laitteella
+            </div>
+          </button>
+
+          <button type="submit" name="game_mode" value="b" class="mode-button">
+            <div class="mode-title">🤖 Pelaaja vs Tekoäly</div>
+            <div class="mode-description">
+              Pelaa yksinkertaista tekoälyä vastaan
+            </div>
+          </button>
+
+          <button type="submit" name="game_mode" value="c" class="mode-button">
+            <div class="mode-title">🧠 Pelaaja vs Parannettu Tekoäly</div>
+            <div class="mode-description">Haasta älykäs, oppiva tekoäly</div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

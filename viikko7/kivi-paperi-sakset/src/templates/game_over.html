@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peli päättyi - Kivi-Paperi-Sakset</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 2.5em;
+      }
+
+      .trophy {
+        font-size: 5em;
+        margin: 20px 0;
+      }
+
+      .final-message {
+        font-size: 1.5em;
+        color: #666;
+        margin: 20px 0;
+      }
+
+      .final-scores {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin: 30px 0;
+      }
+
+      .final-scores-title {
+        font-size: 1.3em;
+        margin-bottom: 20px;
+        opacity: 0.9;
+      }
+
+      .score-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.3em;
+        margin: 15px 0;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      .score-value {
+        font-weight: bold;
+        font-size: 1.5em;
+      }
+
+      .winner-announcement {
+        background: #ffc107;
+        color: #333;
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin: 30px 0;
+      }
+
+      .button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 10px;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: transform 0.2s;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎮 Peli päättyi!</h1>
+
+      <div class="trophy">
+        {% if ekan_pisteet > tokan_pisteet %}🏆 {% elif tokan_pisteet >
+        ekan_pisteet %}🤖 {% else %}🤝{% endif %}
+      </div>
+
+      {% if ekan_pisteet > tokan_pisteet %}
+      <div class="winner-announcement">🎉 Pelaaja 1 voitti pelin! 🎉</div>
+      {% elif tokan_pisteet > ekan_pisteet %}
+      <div class="winner-announcement">
+        {% if game_mode == 'a' %} 🎉 Pelaaja 2 voitti pelin! 🎉 {% else %} 🤖
+        Tietokone voitti pelin! 🤖 {% endif %}
+      </div>
+      {% else %}
+      <div class="winner-announcement">🤝 Peli päättyi tasapeliin! 🤝</div>
+      {% endif %}
+
+      <div class="final-scores">
+        <div class="final-scores-title">Lopputulokset</div>
+        <div class="score-row">
+          <span>Pelaaja 1</span>
+          <span class="score-value">{{ ekan_pisteet }}</span>
+        </div>
+        <div class="score-row">
+          <span
+            >{% if game_mode == 'a' %}Pelaaja 2{% else %}Tietokone{% endif
+            %}</span
+          >
+          <span class="score-value">{{ tokan_pisteet }}</span>
+        </div>
+        <div class="score-row">
+          <span>Tasapelit</span>
+          <span class="score-value">{{ tasapelit }}</span>
+        </div>
+      </div>
+
+      <div class="final-message">Kiitos pelaamisesta!</div>
+
+      <a href="{{ url_for('index') }}" class="button">🔄 Pelaa uudelleen</a>
+    </div>
+  </body>
+</html>
