@@ -565,3 +565,115 @@ class TestFiveWinCondition:
         with client.session_transaction() as session:
             if session['tuomari_tokan_pisteet'] >= 5:
                 assert session.get('game_finished') == True
+
+
+class TestMoveStatistics:
+    def test_move_counters_initialized_on_start(self, client):
+        """Test that move counters are initialized when game starts"""
+        client.post('/start_game', data={'game_mode': 'a'})
+
+        with client.session_transaction() as session:
+            assert 'ekan_moves' in session
+            assert 'tokan_moves' in session
+            assert session['ekan_moves'] == {'k': 0, 'p': 0, 's': 0}
+            assert session['tokan_moves'] == {'k': 0, 'p': 0, 's': 0}
+
+    def test_moves_are_tracked_correctly(self, client_with_session):
+        """Test that moves are counted correctly during gameplay"""
+        # Initialize move counters
+        with client_with_session.session_transaction() as session:
+            session['ekan_moves'] = {'k': 0, 'p': 0, 's': 0}
+            session['tokan_moves'] = {'k': 0, 'p': 0, 's': 0}
+
+        # Player 1 uses rock, Player 2 uses scissors
+        client_with_session.post('/make_move',
+                                 data={'ekan_siirto': 'k', 'tokan_siirto': 's'})
+
+        with client_with_session.session_transaction() as session:
+            assert session['ekan_moves']['k'] == 1
+            assert session['tokan_moves']['s'] == 1
+
+    def test_multiple_moves_tracked(self, client_with_session):
+        """Test tracking of multiple moves"""
+        # Initialize move counters
+        with client_with_session.session_transaction() as session:
+            session['ekan_moves'] = {'k': 0, 'p': 0, 's': 0}
+            session['tokan_moves'] = {'k': 0, 'p': 0, 's': 0}
+
+        # Play several rounds
+        client_with_session.post('/make_move',
+                                 data={'ekan_siirto': 'k', 'tokan_siirto': 's'})
+        client_with_session.post('/make_move',
+                                 data={'ekan_siirto': 'k', 'tokan_siirto': 'p'})
+        client_with_session.post('/make_move',
+                                 data={'ekan_siirto': 'p', 'tokan_siirto': 's'})
+
+        with client_with_session.session_transaction() as session:
+            assert session['ekan_moves']['k'] == 2
+            assert session['ekan_moves']['p'] == 1
+            assert session['ekan_moves']['s'] == 0
+            assert session['tokan_moves']['k'] == 0
+            assert session['tokan_moves']['p'] == 1
+            assert session['tokan_moves']['s'] == 2
+
+    def test_game_over_page_receives_statistics(self, client):
+        """Test that game_over page receives move statistics"""
+        with client.session_transaction() as session:
+            session['tuomari_ekan_pisteet'] = 5
+            session['tuomari_tokan_pisteet'] = 3
+            session['tuomari_tasapelit'] = 1
+            session['game_mode'] = 'a'
+            session['ekan_moves'] = {'k': 3, 'p': 4, 's': 2}
+            session['tokan_moves'] = {'k': 2, 'p': 3, 's': 4}
+
+        response = client.get('/game_over')
+        assert response.status_code == 200
+        # Check that statistics are displayed
+        assert b'Siirtojen tilastot' in response.data or 'tilastot'.encode(
+            'utf-8') in response.data
+
+    def test_move_statistics_displayed_on_game_over(self, client):
+        """Test that move counts are shown on game over page"""
+        with client.session_transaction() as session:
+            session['tuomari_ekan_pisteet'] = 5
+            session['tuomari_tokan_pisteet'] = 2
+            session['game_mode'] = 'a'
+            session['ekan_moves'] = {'k': 5, 'p': 2, 's': 0}
+            session['tokan_moves'] = {'k': 1, 'p': 3, 's': 3}
+
+        response = client.get('/game_over')
+        assert response.status_code == 200
+        # Numbers should be visible in the response
+        assert b'5' in response.data
+        assert b'2' in response.data
+        assert b'3' in response.data
+
+    def test_ai_moves_are_tracked(self, client):
+        """Test that AI moves are also tracked in statistics"""
+        client.post('/start_game', data={'game_mode': 'b'})
+
+        # Make a move against AI
+        client.post('/make_move', data={'ekan_siirto': 'k'})
+
+        with client.session_transaction() as session:
+            # Player move should be tracked
+            assert session['ekan_moves']['k'] == 1
+            # AI move should also be tracked
+            total_ai_moves = sum(session['tokan_moves'].values())
+            assert total_ai_moves == 1
+
+    def test_complete_game_statistics(self, client):
+        """Test complete game with full statistics tracking"""
+        # Start game
+        client.post('/start_game', data={'game_mode': 'a'})
+
+        # Play 5 rounds where player 1 wins with rock
+        for i in range(5):
+            client.post('/make_move',
+                        data={'ekan_siirto': 'k', 'tokan_siirto': 's'})
+
+        # Check that all moves were tracked
+        with client.session_transaction() as session:
+            assert session['ekan_moves']['k'] == 5
+            assert session['tokan_moves']['s'] == 5
+            assert session['tuomari_ekan_pisteet'] == 5

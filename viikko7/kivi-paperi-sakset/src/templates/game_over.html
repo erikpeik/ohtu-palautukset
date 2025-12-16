@@ -105,6 +105,62 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
       }
+
+      .move-statistics {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        margin: 30px 0;
+      }
+
+      .stats-title {
+        font-size: 1.3em;
+        color: #333;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .player-stats {
+        margin: 20px 0;
+      }
+
+      .player-name {
+        font-size: 1.1em;
+        color: #667eea;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .moves-grid {
+        display: flex;
+        justify-content: space-around;
+        gap: 10px;
+      }
+
+      .move-stat {
+        flex: 1;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .move-emoji {
+        font-size: 2.5em;
+        margin-bottom: 5px;
+      }
+
+      .move-name {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .move-count {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #667eea;
+      }
     </style>
   </head>
   <body>
@@ -143,6 +199,54 @@
         <div class="score-row">
           <span>Tasapelit</span>
           <span class="score-value">{{ tasapelit }}</span>
+        </div>
+      </div>
+
+      <div class="move-statistics">
+        <div class="stats-title">📊 Siirtojen tilastot</div>
+
+        <div class="player-stats">
+          <div class="player-name">Pelaaja 1</div>
+          <div class="moves-grid">
+            <div class="move-stat">
+              <div class="move-emoji">✊</div>
+              <div class="move-name">Kivi</div>
+              <div class="move-count">{{ ekan_moves.k }}</div>
+            </div>
+            <div class="move-stat">
+              <div class="move-emoji">📄</div>
+              <div class="move-name">Paperi</div>
+              <div class="move-count">{{ ekan_moves.p }}</div>
+            </div>
+            <div class="move-stat">
+              <div class="move-emoji">✂️</div>
+              <div class="move-name">Sakset</div>
+              <div class="move-count">{{ ekan_moves.s }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="player-stats">
+          <div class="player-name">
+            {% if game_mode == 'a' %}Pelaaja 2{% else %}Tietokone{% endif %}
+          </div>
+          <div class="moves-grid">
+            <div class="move-stat">
+              <div class="move-emoji">✊</div>
+              <div class="move-name">Kivi</div>
+              <div class="move-count">{{ tokan_moves.k }}</div>
+            </div>
+            <div class="move-stat">
+              <div class="move-emoji">📄</div>
+              <div class="move-name">Paperi</div>
+              <div class="move-count">{{ tokan_moves.p }}</div>
+            </div>
+            <div class="move-stat">
+              <div class="move-emoji">✂️</div>
+              <div class="move-name">Sakset</div>
+              <div class="move-count">{{ tokan_moves.s }}</div>
+            </div>
+          </div>
         </div>
       </div>
 

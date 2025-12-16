@@ -27,6 +27,10 @@ def start_game():
     session['tuomari_tasapelit'] = 0
     session['round'] = 1
 
+    # Initialize move statistics
+    session['ekan_moves'] = {'k': 0, 'p': 0, 's': 0}
+    session['tokan_moves'] = {'k': 0, 'p': 0, 's': 0}
+
     # Initialize AI if needed
     if game_mode == 'b':
         session['tekoaly_siirto'] = 0
@@ -149,6 +153,14 @@ def make_move():
     session['last_ekan_siirto'] = ekan_siirto
     session['last_tokan_siirto'] = tokan_siirto
 
+    # Track move statistics
+    ekan_moves = session.get('ekan_moves', {'k': 0, 'p': 0, 's': 0})
+    tokan_moves = session.get('tokan_moves', {'k': 0, 'p': 0, 's': 0})
+    ekan_moves[ekan_siirto] = ekan_moves.get(ekan_siirto, 0) + 1
+    tokan_moves[tokan_siirto] = tokan_moves.get(tokan_siirto, 0) + 1
+    session['ekan_moves'] = ekan_moves
+    session['tokan_moves'] = tokan_moves
+
     # Check if either player has reached 5 wins
     if ekan_pisteet >= 5 or tokan_pisteet >= 5:
         session['game_finished'] = True
@@ -196,6 +208,10 @@ def game_over():
     tasapelit = session.get('tuomari_tasapelit', 0)
     game_mode = session.get('game_mode')
 
+    # Get move statistics
+    ekan_moves = session.get('ekan_moves', {'k': 0, 'p': 0, 's': 0})
+    tokan_moves = session.get('tokan_moves', {'k': 0, 'p': 0, 's': 0})
+
     # Clear session
     session.clear()
 
@@ -203,7 +219,9 @@ def game_over():
                            ekan_pisteet=ekan_pisteet,
                            tokan_pisteet=tokan_pisteet,
                            tasapelit=tasapelit,
-                           game_mode=game_mode)
+                           game_mode=game_mode,
+                           ekan_moves=ekan_moves,
+                           tokan_moves=tokan_moves)
 
 
 def _eka_voittaa(eka, toka):

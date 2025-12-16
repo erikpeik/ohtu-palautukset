@@ -38,7 +38,7 @@ poetry run pytest src/tests/ --cov=src --cov-report=term-missing
 
 ## Test Coverage
 
-The test suite includes 41 tests covering:
+The test suite includes 48 tests covering:
 
 - **Index Route Tests**: Main page loading and game mode selection
 - **Start Game Tests**: Game initialization for all three modes (Player vs Player, Player vs AI, Player vs Improved AI)
@@ -59,8 +59,13 @@ The test suite includes 41 tests covering:
   - Ties don't count towards the 5 wins
   - UI correctly shows game finished state
   - Works correctly for all game modes (PvP and AI)
+- **Move Statistics Tests**:
+  - Move counters are properly initialized
+  - Each player's moves (rock/paper/scissors) are tracked
+  - Statistics are correctly displayed on game over page
+  - Works for both human players and AI opponents
 
-Current coverage: **88%** for web_app.py## Test Structure
+Current coverage: **89%** for web_app.py## Test Structure
 
 ```
 src/tests/
@@ -78,3 +83,5 @@ src/tests/
 - `TestGameOver`: Tests for game completion
 - `TestWinLogic`: Tests for win/loss/tie logic
 - `TestGameFlow`: Integration tests for complete game flows
+- `TestFiveWinCondition`: Tests for the 5-win game ending condition
+- `TestMoveStatistics`: Tests for tracking and displaying move statistics
