@@ -182,12 +182,18 @@
       </div>
 
       <div class="button-group">
+        {% if game_finished %}
+        <a href="{{ url_for('game_over') }}" class="button button-primary">
+          🏁 Näytä lopputulos
+        </a>
+        {% else %}
         <a href="{{ url_for('play_game') }}" class="button button-primary">
           ▶️ Seuraava kierros
         </a>
         <a href="{{ url_for('game_over') }}" class="button button-secondary">
           🏁 Lopeta peli
         </a>
+        {% endif %}
       </div>
     </div>
   </body>

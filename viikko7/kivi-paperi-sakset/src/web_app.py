@@ -149,6 +149,10 @@ def make_move():
     session['last_ekan_siirto'] = ekan_siirto
     session['last_tokan_siirto'] = tokan_siirto
 
+    # Check if either player has reached 5 wins
+    if ekan_pisteet >= 5 or tokan_pisteet >= 5:
+        session['game_finished'] = True
+
     return redirect(url_for('round_result'))
 
 
@@ -158,6 +162,7 @@ def round_result():
     ekan_siirto = session.get('last_ekan_siirto')
     tokan_siirto = session.get('last_tokan_siirto')
     game_mode = session.get('game_mode')
+    game_finished = session.get('game_finished', False)
 
     siirto_names = {'k': 'Kivi', 'p': 'Paperi', 's': 'Sakset'}
 
@@ -179,7 +184,8 @@ def round_result():
                            ekan_pisteet=session.get('tuomari_ekan_pisteet', 0),
                            tokan_pisteet=session.get(
                                'tuomari_tokan_pisteet', 0),
-                           tasapelit=session.get('tuomari_tasapelit', 0))
+                           tasapelit=session.get('tuomari_tasapelit', 0),
+                           game_finished=game_finished)
 
 
 @app.route('/game_over')

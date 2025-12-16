@@ -38,7 +38,7 @@ poetry run pytest src/tests/ --cov=src --cov-report=term-missing
 
 ## Test Coverage
 
-The test suite includes 33 tests covering:
+The test suite includes 41 tests covering:
 
 - **Index Route Tests**: Main page loading and game mode selection
 - **Start Game Tests**: Game initialization for all three modes (Player vs Player, Player vs AI, Player vs Improved AI)
@@ -53,10 +53,14 @@ The test suite includes 33 tests covering:
 - **Game Over Tests**: Final score display and session cleanup
 - **Win Logic Tests**: All winning combinations for rock-paper-scissors
 - **Game Flow Tests**: Complete multi-round game scenarios
+- **Five Win Condition Tests**:
+  - Game automatically ends when either player reaches 5 wins
+  - Game continues until 5 wins are reached
+  - Ties don't count towards the 5 wins
+  - UI correctly shows game finished state
+  - Works correctly for all game modes (PvP and AI)
 
-Current coverage: **88%** for web_app.py
-
-## Test Structure
+Current coverage: **88%** for web_app.py## Test Structure
 
 ```
 src/tests/

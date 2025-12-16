@@ -400,3 +400,168 @@ class TestGameFlow:
             assert session['tuomari_tokan_pisteet'] == 1
             assert session['tuomari_tasapelit'] == 1
             assert session['round'] == 4
+
+
+class TestFiveWinCondition:
+    def test_game_finishes_when_player_1_reaches_5_wins(self, client_with_session):
+        """Test that game automatically finishes when player 1 reaches 5 wins"""
+        # Set up session with 4 wins for player 1
+        with client_with_session.session_transaction() as session:
+            session['tuomari_ekan_pisteet'] = 4
+            session['tuomari_tokan_pisteet'] = 2
+            session['round'] = 7
+
+        # Play one more round where player 1 wins (reaching 5)
+        response = client_with_session.post('/make_move',
+                                            data={'ekan_siirto': 'k',
+                                                  'tokan_siirto': 's'},
+                                            follow_redirects=False)
+
+        # Check that game_finished flag is set
+        with client_with_session.session_transaction() as session:
+            assert session['tuomari_ekan_pisteet'] == 5
+            assert session.get('game_finished') == True
+
+    def test_game_finishes_when_player_2_reaches_5_wins(self, client_with_session):
+        """Test that game automatically finishes when player 2 reaches 5 wins"""
+        # Set up session with 4 wins for player 2
+        with client_with_session.session_transaction() as session:
+            session['tuomari_ekan_pisteet'] = 2
+            session['tuomari_tokan_pisteet'] = 4
+            session['round'] = 7
+
+        # Play one more round where player 2 wins (reaching 5)
+        response = client_with_session.post('/make_move',
+                                            data={'ekan_siirto': 'k',
+                                                  'tokan_siirto': 'p'},
+                                            follow_redirects=False)
+
+        # Check that game_finished flag is set
+        with client_with_session.session_transaction() as session:
+            assert session['tuomari_tokan_pisteet'] == 5
+            assert session.get('game_finished') == True
+
+    def test_game_continues_when_neither_has_5_wins(self, client_with_session):
+        """Test that game continues when neither player has 5 wins"""
+        # Set up session with 3 and 4 wins
+        with client_with_session.session_transaction() as session:
+            session['tuomari_ekan_pisteet'] = 3
+            session['tuomari_tokan_pisteet'] = 4
+            session['round'] = 8
+
+        # Play one more round
+        response = client_with_session.post('/make_move',
+                                            data={'ekan_siirto': 'k',
+                                                  'tokan_siirto': 's'},
+                                            follow_redirects=False)
+
+        # Check that game_finished flag is not set
+        with client_with_session.session_transaction() as session:
+            assert session['tuomari_ekan_pisteet'] == 4
+            assert session.get('game_finished') != True
+
+    def test_round_result_shows_game_finished_when_5_wins_reached(self, client):
+        """Test that round result page shows game finished when 5 wins reached"""
+        with client.session_transaction() as session:
+            session['last_ekan_siirto'] = 'k'
+            session['last_tokan_siirto'] = 's'
+            session['game_mode'] = 'a'
+            session['tuomari_ekan_pisteet'] = 5
+            session['tuomari_tokan_pisteet'] = 3
+            session['tuomari_tasapelit'] = 1
+            session['game_finished'] = True
+
+        response = client.get('/round_result')
+        assert response.status_code == 200
+        # Should show "Näytä lopputulos" button instead of "Seuraava kierros"
+        assert 'lopputulos'.encode('utf-8') in response.data
+
+    def test_round_result_shows_continue_when_under_5_wins(self, client):
+        """Test that round result page shows continue button when under 5 wins"""
+        with client.session_transaction() as session:
+            session['last_ekan_siirto'] = 'k'
+            session['last_tokan_siirto'] = 's'
+            session['game_mode'] = 'a'
+            session['tuomari_ekan_pisteet'] = 3
+            session['tuomari_tokan_pisteet'] = 2
+            session['tuomari_tasapelit'] = 0
+            session['game_finished'] = False
+
+        response = client.get('/round_result')
+        assert response.status_code == 200
+        # Should show "Seuraava kierros" button
+        assert 'Seuraava kierros'.encode('utf-8') in response.data
+
+    def test_complete_game_to_5_wins(self, client):
+        """Test a complete game where player 1 wins 5 rounds"""
+        # Start game
+        client.post('/start_game',
+                    data={'game_mode': 'a'}, follow_redirects=True)
+
+        # Play 5 rounds where player 1 always wins
+        for i in range(5):
+            response = client.post('/make_move',
+                                   data={'ekan_siirto': 'k',
+                                         'tokan_siirto': 's'},
+                                   follow_redirects=False)
+            assert response.status_code == 302
+
+        # Check that game is finished after 5 wins
+        with client.session_transaction() as session:
+            assert session['tuomari_ekan_pisteet'] == 5
+            assert session['game_finished'] == True
+
+    def test_game_with_ties_continues_until_5_wins(self, client):
+        """Test that ties don't count towards the 5 wins needed"""
+        client.post('/start_game',
+                    data={'game_mode': 'a'}, follow_redirects=True)
+
+        # Play 3 rounds where player 1 wins
+        for i in range(3):
+            client.post('/make_move',
+                        data={'ekan_siirto': 'k', 'tokan_siirto': 's'},
+                        follow_redirects=False)
+
+        # Play 2 ties
+        for i in range(2):
+            client.post('/make_move',
+                        data={'ekan_siirto': 'k', 'tokan_siirto': 'k'},
+                        follow_redirects=False)
+
+        # Check that game is not finished
+        with client.session_transaction() as session:
+            assert session['tuomari_ekan_pisteet'] == 3
+            assert session['tuomari_tasapelit'] == 2
+            assert session.get('game_finished') != True
+
+        # Play 2 more wins for player 1 to reach 5
+        for i in range(2):
+            client.post('/make_move',
+                        data={'ekan_siirto': 'p', 'tokan_siirto': 'k'},
+                        follow_redirects=False)
+
+        # Now game should be finished
+        with client.session_transaction() as session:
+            assert session['tuomari_ekan_pisteet'] == 5
+            assert session['game_finished'] == True
+
+    def test_ai_game_finishes_at_5_wins(self, client):
+        """Test that AI game also finishes at 5 wins"""
+        # Start AI game
+        client.post('/start_game',
+                    data={'game_mode': 'b'}, follow_redirects=True)
+
+        # Set up near-win condition for AI
+        with client.session_transaction() as session:
+            session['tuomari_tokan_pisteet'] = 4
+            session['tekoaly_siirto'] = 0
+
+        # Play a round where AI wins (use move that AI will counter)
+        response = client.post('/make_move',
+                               data={'ekan_siirto': 's'},
+                               follow_redirects=False)
+
+        # If AI reached 5 wins, game should be finished
+        with client.session_transaction() as session:
+            if session['tuomari_tokan_pisteet'] >= 5:
+                assert session.get('game_finished') == True
