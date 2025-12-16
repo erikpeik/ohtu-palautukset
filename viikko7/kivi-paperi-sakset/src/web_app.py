@@ -161,8 +161,8 @@ def make_move():
     session['ekan_moves'] = ekan_moves
     session['tokan_moves'] = tokan_moves
 
-    # Check if either player has reached 5 wins
-    if ekan_pisteet >= 5 or tokan_pisteet >= 5:
+    # Check if either player has reached 3 wins
+    if ekan_pisteet >= 3 or tokan_pisteet >= 3:
         session['game_finished'] = True
 
     return redirect(url_for('round_result'))
